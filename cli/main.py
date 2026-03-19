@@ -57,7 +57,9 @@ SHELL_COMMAND_PATTERNS = [
 def _provider_display_name() -> str:
     """Return a human-readable provider label for the banner."""
     if settings.llm_provider == "nvidia":
-        return "NVIDIA NIM"
+        return "NVIDIA NIM (open-source models)"
+    if settings.llm_provider == "ollama":
+        return f"Ollama (local open-source @ {settings.ollama_base_url})"
     return "GitHub Models API"
 
 
@@ -67,7 +69,15 @@ def _setup_instructions() -> str:
         return (
             "1. Copy `.env.example` to `.env`\n"
             "2. Set `NVIDIA_API_KEY` in `.env` or your environment\n"
-            "3. Use a tool-capable NVIDIA model, e.g. `meta/llama-3.3-70b-instruct`"
+            "3. Use a strong open-source model, e.g. `deepseek-ai/deepseek-r1`\n"
+            "   Get a free key at: https://build.nvidia.com"
+        )
+    if settings.llm_provider == "ollama":
+        return (
+            "1. Install Ollama: https://ollama.com/download\n"
+            "2. Pull a model: `ollama pull deepseek-r1` (or llama3.3, qwen2.5:72b)\n"
+            "3. Set `MODEL_NAME=deepseek-r1` in `.env`\n"
+            "   No API key required — runs 100% locally for free"
         )
     return (
         "1. Copy `.env.example` to `.env`\n"
@@ -259,8 +269,7 @@ def run_interactive() -> None:
     except ValueError as e:
         console.print(
             Panel(
-                f"[bold red]Configuration Error[/bold red]\n\n{e!s}\n\n"
-                f"{_setup_instructions()}",
+                f"[bold red]Configuration Error[/bold red]\n\n{e!s}\n\n{_setup_instructions()}",
                 title="⚠️  Setup Required",
                 border_style="red",
             )

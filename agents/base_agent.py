@@ -6,13 +6,8 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
-from langchain_openai import ChatOpenAI
 
-try:
-    from langchain_nvidia_ai_endpoints import ChatNVIDIA
-except ImportError:
-    ChatNVIDIA = None
-
+from config.llm_factory import create_chat_model
 from config.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -45,14 +40,7 @@ class BaseAgent(ABC):
 
     def _create_llm(self) -> Any:
         """Create the configured LLM client for this agent."""
-        if settings.llm_provider == "nvidia":
-            if ChatNVIDIA is None:
-                raise ImportError(
-                    "langchain-nvidia-ai-endpoints is required for LLM_PROVIDER=nvidia. "
-                    "Install it with: pip install langchain-nvidia-ai-endpoints"
-                )
-            return ChatNVIDIA(**settings.get_llm_kwargs())
-        return ChatOpenAI(**settings.get_llm_kwargs())
+        return create_chat_model(settings)
 
     def _rebuild_llm_with_tools(self) -> None:
         """Rebuild the tool-bound LLM instance from the current tool list."""

@@ -2,7 +2,6 @@
 
 import os
 
-
 # Force a tool-independent provider for tests before application modules import settings.
 os.environ["LLM_PROVIDER"] = "github"
 os.environ["GITHUB_TOKEN"] = "test-token"

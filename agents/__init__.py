@@ -7,9 +7,9 @@ from agents.exploit_analyzer import ExploitAnalyzerAgent
 from agents.orchestrator import OrchestratorAgent
 
 __all__ = [
+    "APIDesignAgent",
     "AgentCommunicationBus",
     "AgentMessage",
-    "APIDesignAgent",
     "BaseAgent",
     "DatabaseAgent",
     "DelegationDepthExceeded",

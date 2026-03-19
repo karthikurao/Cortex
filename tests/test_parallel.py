@@ -228,7 +228,7 @@ class TestAgentTools:
 class TestParallelExecution:
     """Tests for the parallel execution logic in the orchestrator."""
 
-    @patch("agents.base_agent.ChatOpenAI")
+    @patch("agents.base_agent.create_chat_model")
     def test_priority_grouping(self, mock_llm):
         """Assignments should be grouped by priority level."""
         from collections import defaultdict
@@ -250,7 +250,7 @@ class TestParallelExecution:
         assert len(groups[3]) == 1
         assert sorted(groups.keys()) == [1, 2, 3]
 
-    @patch("agents.base_agent.ChatOpenAI")
+    @patch("agents.base_agent.create_chat_model")
     def test_same_priority_agents_identified_for_parallel(self, mock_llm):
         """Same-priority agents should be identified as parallelizable."""
         assignments = [
@@ -274,7 +274,7 @@ class TestParallelExecution:
 class TestBaseAgentCommunication:
     """Tests for BaseAgent communication bus integration."""
 
-    @patch("agents.base_agent.ChatOpenAI")
+    @patch("agents.base_agent.create_chat_model")
     def test_set_communication_bus_adds_tools(self, mock_llm):
         """Setting a bus should add delegation tools to the agent."""
         from agents.code_reviewer import CodeReviewerAgent
@@ -291,7 +291,7 @@ class TestBaseAgentCommunication:
         assert "delegate_to_agent" in tool_names
         assert "request_via_orchestrator" in tool_names
 
-    @patch("agents.base_agent.ChatOpenAI")
+    @patch("agents.base_agent.create_chat_model")
     def test_set_communication_bus_idempotent(self, mock_llm):
         """Setting the bus multiple times should not duplicate tools."""
         from agents.code_reviewer import CodeReviewerAgent

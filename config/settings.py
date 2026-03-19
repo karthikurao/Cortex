@@ -21,9 +21,7 @@ class Settings:
     api_base_url: str = field(
         default_factory=lambda: os.getenv("API_BASE_URL", "https://models.inference.ai.azure.com")
     )
-    ollama_base_url: str = field(
-        default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    )
+    ollama_base_url: str = field(default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"))
     max_tokens: int = field(default_factory=lambda: int(os.getenv("MAX_TOKENS", "4096")))
     temperature: float = field(default_factory=lambda: float(os.getenv("TEMPERATURE", "0.3")))
     top_p: float = field(default_factory=lambda: float(os.getenv("TOP_P", "1.0")))
@@ -43,12 +41,9 @@ class Settings:
             )
 
         if self.llm_provider == "ollama":
-            # Ollama runs locally — no API key required, but a valid model name is required.
+            # Ollama runs locally — no API key required. Ensure a valid local model is set.
             if not self.model_name or self.model_name == "gpt-4o":
-                raise ValueError(
-                    "MODEL_NAME must be set to a valid Ollama model when LLM_PROVIDER=ollama. "
-                    "Set MODEL_NAME in your .env file or as a system environment variable."
-                )
+                self.model_name = "deepseek-r1"
             return
 
         if self.llm_provider != "nvidia" and not self.github_token:

@@ -269,8 +269,7 @@ def run_interactive() -> None:
     except ValueError as e:
         console.print(
             Panel(
-                f"[bold red]Configuration Error[/bold red]\n\n{e!s}\n\n"
-                f"{_setup_instructions()}",
+                f"[bold red]Configuration Error[/bold red]\n\n{e!s}\n\n{_setup_instructions()}",
                 title="⚠️  Setup Required",
                 border_style="red",
             )

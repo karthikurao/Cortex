@@ -36,7 +36,7 @@ class TestBaseAgentInterface:
         module = importlib.import_module(module_path)
         return getattr(module, class_name)
 
-    @patch("agents.base_agent.ChatOpenAI")
+    @patch("agents.base_agent.create_chat_model")
     def test_agent_has_system_prompt(self, mock_llm, agent_class_path):
         """Each agent must return a non-empty system prompt."""
         cls = self._import_agent_class(agent_class_path)
@@ -45,7 +45,7 @@ class TestBaseAgentInterface:
         assert isinstance(prompt, str)
         assert len(prompt) > 100, f"{cls.__name__} system prompt is too short"
 
-    @patch("agents.base_agent.ChatOpenAI")
+    @patch("agents.base_agent.create_chat_model")
     def test_agent_has_id_and_name(self, mock_llm, agent_class_path):
         """Each agent must have a non-empty ID and name."""
         cls = self._import_agent_class(agent_class_path)
@@ -53,7 +53,7 @@ class TestBaseAgentInterface:
         assert agent.agent_id, f"{cls.__name__} has no agent_id"
         assert agent.name, f"{cls.__name__} has no name"
 
-    @patch("agents.base_agent.ChatOpenAI")
+    @patch("agents.base_agent.create_chat_model")
     def test_agent_repr(self, mock_llm, agent_class_path):
         """Each agent should have a useful repr."""
         cls = self._import_agent_class(agent_class_path)
@@ -62,7 +62,7 @@ class TestBaseAgentInterface:
         assert agent.agent_id in repr_str
         assert agent.name in repr_str
 
-    @patch("agents.base_agent.ChatOpenAI")
+    @patch("agents.base_agent.create_chat_model")
     def test_format_output_structure(self, mock_llm, agent_class_path):
         """format_output should return a dict with required keys including severity."""
         cls = self._import_agent_class(agent_class_path)

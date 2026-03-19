@@ -9,18 +9,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, TypedDict
 
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
-
-try:
-    from langchain_nvidia_ai_endpoints import ChatNVIDIA
-except ImportError:
-    ChatNVIDIA = None
-
-try:
-    from langchain_ollama import ChatOllama
-except ImportError:
-    ChatOllama = None
 
 from agents.api_design import APIDesignAgent
 from agents.architecture import ArchitectureAgent
@@ -37,6 +26,7 @@ from agents.refactoring import RefactoringAgent
 from agents.security import SecurityAgent
 from agents.testing import TestingAgent
 from config.agent_registry import AgentRegistry
+from config.llm_factory import create_chat_model
 from config.settings import settings
 from prompts.orchestrator_prompt import ORCHESTRATOR_SYSTEM_PROMPT
 
@@ -100,21 +90,7 @@ class OrchestratorAgent:
 
     def _create_llm(self) -> Any:
         """Create the configured LLM client for orchestrator routing."""
-        if settings.llm_provider == "nvidia":
-            if ChatNVIDIA is None:
-                raise ImportError(
-                    "langchain-nvidia-ai-endpoints is required for LLM_PROVIDER=nvidia. "
-                    "Install it with: pip install langchain-nvidia-ai-endpoints"
-                )
-            return ChatNVIDIA(**settings.get_llm_kwargs())
-        if settings.llm_provider == "ollama":
-            if ChatOllama is None:
-                raise ImportError(
-                    "langchain-ollama is required for LLM_PROVIDER=ollama. "
-                    "Install it with: pip install langchain-ollama"
-                )
-            return ChatOllama(**settings.get_llm_kwargs())
-        return ChatOpenAI(**settings.get_llm_kwargs())
+        return create_chat_model(settings)
 
     def _initialize_agents(self) -> dict[str, Any]:
         """Create instances of all specialist agents."""

@@ -20,6 +20,9 @@ class TestBaseAgentInterface:
             "agents.devops.DevOpsAgent",
             "agents.performance.PerformanceAgent",
             "agents.exploit_analyzer.ExploitAnalyzerAgent",
+            "agents.database.DatabaseAgent",
+            "agents.api_design.APIDesignAgent",
+            "agents.dependency_audit.DependencyAuditAgent",
         ]
     )
     def agent_class_path(self, request):
@@ -96,6 +99,9 @@ class TestAgentPrompts:
             ("prompts.devops_prompt", "DEVOPS_SYSTEM_PROMPT"),
             ("prompts.performance_prompt", "PERFORMANCE_SYSTEM_PROMPT"),
             ("prompts.exploit_analyzer_prompt", "EXPLOIT_ANALYZER_SYSTEM_PROMPT"),
+            ("prompts.database_prompt", "DATABASE_SYSTEM_PROMPT"),
+            ("prompts.api_design_prompt", "API_DESIGN_SYSTEM_PROMPT"),
+            ("prompts.dependency_audit_prompt", "DEPENDENCY_AUDIT_SYSTEM_PROMPT"),
         ],
     )
     def test_prompt_exists_and_is_substantial(self, prompt_module, prompt_var):

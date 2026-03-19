@@ -10,9 +10,9 @@ from config.agent_registry import AgentRegistry
 class TestAgentRegistry:
     """Tests for the AgentRegistry class."""
 
-    def test_registry_has_10_agents(self):
+    def test_registry_has_13_agents(self):
         registry = AgentRegistry()
-        assert len(registry.list_all()) == 10
+        assert len(registry.list_all()) == 13
 
     def test_all_agent_ids_are_unique(self):
         registry = AgentRegistry()
@@ -59,6 +59,9 @@ class TestAgentRegistry:
             "devops",
             "performance",
             "exploit_analyzer",
+            "database",
+            "api_design",
+            "dependency_audit",
         ],
     )
     def test_each_agent_is_registered(self, agent_id):
@@ -109,9 +112,12 @@ class TestOrchestratorAgentLookup:
 
     def test_all_registered_agents_can_be_instantiated(self):
         """Verify that all agents in the registry have corresponding classes."""
+        from agents.api_design import APIDesignAgent
         from agents.architecture import ArchitectureAgent
         from agents.bug_analyzer import BugAnalyzerAgent
         from agents.code_reviewer import CodeReviewerAgent
+        from agents.database import DatabaseAgent
+        from agents.dependency_audit import DependencyAuditAgent
         from agents.devops import DevOpsAgent
         from agents.documentation import DocumentationAgent
         from agents.exploit_analyzer import ExploitAnalyzerAgent
@@ -131,8 +137,94 @@ class TestOrchestratorAgentLookup:
             "devops": DevOpsAgent,
             "performance": PerformanceAgent,
             "exploit_analyzer": ExploitAnalyzerAgent,
+            "database": DatabaseAgent,
+            "api_design": APIDesignAgent,
+            "dependency_audit": DependencyAuditAgent,
         }
 
         registry = AgentRegistry()
         for agent_id in registry.get_ids():
             assert agent_id in agent_classes, f"No class found for agent: {agent_id}"
+
+
+class TestOllamaSettings:
+    """Tests for the Ollama provider configuration."""
+
+    def test_ollama_get_llm_kwargs(self):
+        """Ollama kwargs should include model, base_url, and temperature."""
+        import os
+        from unittest.mock import patch
+
+        with patch.dict(
+            os.environ,
+            {
+                "LLM_PROVIDER": "ollama",
+                "MODEL_NAME": "deepseek-r1",
+                "OLLAMA_BASE_URL": "http://localhost:11434",
+                "TEMPERATURE": "0.3",
+            },
+        ):
+            from config.settings import Settings
+
+            s = Settings()
+            kwargs = s.get_llm_kwargs()
+            assert kwargs["model"] == "deepseek-r1"
+            assert kwargs["base_url"] == "http://localhost:11434"
+            assert kwargs["temperature"] == 0.3
+            # No api_key or max_tokens in Ollama kwargs
+            assert "api_key" not in kwargs
+
+    def test_ollama_validate_requires_no_api_key(self):
+        """Ollama provider validation should succeed without any API keys."""
+        import os
+        from unittest.mock import patch
+
+        with patch.dict(
+            os.environ,
+            {
+                "LLM_PROVIDER": "ollama",
+                "GITHUB_TOKEN": "",
+                "NVIDIA_API_KEY": "",
+            },
+            clear=False,
+        ):
+            from config.settings import Settings
+
+            s = Settings()
+            # Should not raise
+            s.validate()
+
+    def test_ollama_default_base_url(self):
+        """OLLAMA_BASE_URL should default to localhost:11434."""
+        import os
+        from unittest.mock import patch
+
+        with patch.dict(os.environ, {"LLM_PROVIDER": "ollama"}, clear=False):
+            # Remove OLLAMA_BASE_URL to test default
+            env = {k: v for k, v in os.environ.items() if k != "OLLAMA_BASE_URL"}
+            env["LLM_PROVIDER"] = "ollama"
+            with patch.dict(os.environ, env, clear=True):
+                from config.settings import Settings
+
+                s = Settings()
+                assert s.ollama_base_url == "http://localhost:11434"
+
+
+class TestNewAgentsInRegistry:
+    """Tests that the three new specialist agents are properly registered."""
+
+    @pytest.mark.parametrize(
+        "agent_id,expected_name",
+        [
+            ("database", "Database"),
+            ("api_design", "API Design"),
+            ("dependency_audit", "Dependency Audit"),
+        ],
+    )
+    def test_new_agent_registered(self, agent_id, expected_name):
+        registry = AgentRegistry()
+        agent = registry.get(agent_id)
+        assert agent is not None, f"Agent '{agent_id}' not found in registry"
+        assert agent.name == expected_name
+        assert len(agent.capabilities) >= 8
+        assert len(agent.keywords) >= 10

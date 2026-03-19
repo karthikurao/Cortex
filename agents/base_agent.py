@@ -13,6 +13,11 @@ try:
 except ImportError:
     ChatNVIDIA = None
 
+try:
+    from langchain_ollama import ChatOllama
+except ImportError:
+    ChatOllama = None
+
 from config.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -52,6 +57,13 @@ class BaseAgent(ABC):
                     "Install it with: pip install langchain-nvidia-ai-endpoints"
                 )
             return ChatNVIDIA(**settings.get_llm_kwargs())
+        if settings.llm_provider == "ollama":
+            if ChatOllama is None:
+                raise ImportError(
+                    "langchain-ollama is required for LLM_PROVIDER=ollama. "
+                    "Install it with: pip install langchain-ollama"
+                )
+            return ChatOllama(**settings.get_llm_kwargs())
         return ChatOpenAI(**settings.get_llm_kwargs())
 
     def _rebuild_llm_with_tools(self) -> None:

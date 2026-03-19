@@ -17,10 +17,18 @@ try:
 except ImportError:
     ChatNVIDIA = None
 
+try:
+    from langchain_ollama import ChatOllama
+except ImportError:
+    ChatOllama = None
+
+from agents.api_design import APIDesignAgent
 from agents.architecture import ArchitectureAgent
 from agents.bug_analyzer import BugAnalyzerAgent
 from agents.code_reviewer import CodeReviewerAgent
 from agents.communication import AgentCommunicationBus
+from agents.database import DatabaseAgent
+from agents.dependency_audit import DependencyAuditAgent
 from agents.devops import DevOpsAgent
 from agents.documentation import DocumentationAgent
 from agents.exploit_analyzer import ExploitAnalyzerAgent
@@ -78,6 +86,9 @@ class OrchestratorAgent:
         "devops",
         "performance",
         "exploit_analyzer",
+        "database",
+        "api_design",
+        "dependency_audit",
     }
 
     def __init__(self) -> None:
@@ -96,6 +107,13 @@ class OrchestratorAgent:
                     "Install it with: pip install langchain-nvidia-ai-endpoints"
                 )
             return ChatNVIDIA(**settings.get_llm_kwargs())
+        if settings.llm_provider == "ollama":
+            if ChatOllama is None:
+                raise ImportError(
+                    "langchain-ollama is required for LLM_PROVIDER=ollama. "
+                    "Install it with: pip install langchain-ollama"
+                )
+            return ChatOllama(**settings.get_llm_kwargs())
         return ChatOpenAI(**settings.get_llm_kwargs())
 
     def _initialize_agents(self) -> dict[str, Any]:
@@ -111,6 +129,9 @@ class OrchestratorAgent:
             "devops": DevOpsAgent(),
             "performance": PerformanceAgent(),
             "exploit_analyzer": ExploitAnalyzerAgent(),
+            "database": DatabaseAgent(),
+            "api_design": APIDesignAgent(),
+            "dependency_audit": DependencyAuditAgent(),
         }
 
     def _initialize_communication_bus(self) -> AgentCommunicationBus:

@@ -43,7 +43,12 @@ class Settings:
             )
 
         if self.llm_provider == "ollama":
-            # Ollama runs locally — no API key required
+            # Ollama runs locally — no API key required, but a valid model name is required.
+            if not self.model_name or self.model_name == "gpt-4o":
+                raise ValueError(
+                    "MODEL_NAME must be set to a valid Ollama model when LLM_PROVIDER=ollama. "
+                    "Set MODEL_NAME in your .env file or as a system environment variable."
+                )
             return
 
         if self.llm_provider != "nvidia" and not self.github_token:
